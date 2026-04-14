@@ -37,7 +37,27 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="/static/style.css">
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-bgPrimary text-textPrimary font-sans min-h-screen flex flex-col antialiased;
+            }
+        }
+        @layer utilities {
+            .gradient-text {
+                @apply bg-clip-text text-transparent bg-gradient-to-br from-accentPrimary to-accentSecondary;
+            }
+            .btn {
+                @apply inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 transform;
+            }
+            .btn-primary {
+                @apply bg-gradient-to-br from-accentPrimary to-accentSecondary text-white shadow-[0_4px_14px_rgba(99,102,241,0.3)] hover:shadow-[0_6px_20px_rgba(99,102,241,0.45)] hover:-translate-y-[1px];
+            }
+            .btn-secondary {
+                @apply bg-white text-textPrimary border border-gray-200 shadow-sm hover:border-accentPrimary hover:text-accentPrimary hover:shadow-md;
+            }
+        }
+    </style>
 </head>
 
 <body>
