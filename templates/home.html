@@ -1,6 +1,250 @@
 {% extends "base.html" %}
-{% block title %}AttritionIQ — Employee Attrition Prediction{% endblock %}
+{% block title %}LiSign — Employee Attrition Prediction{% endblock %}
 
 {% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-bgPrimary via-[#eef0f8] to-[#e8ecf8] relative overflow-hidden py-24 px-6"
+    id="hero-section">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-48 -right-48 w-[500px] h-[500px] rounded-full"
+        style="background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);"></div>
+    <div class="absolute -bottom-36 -left-36 w-[400px] h-[400px] rounded-full"
+        style="background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%);"></div>
 
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-[1.2fr_0.8fr] gap-16 relative z-10 items-center">
+        <div class="hero-content">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 bg-accentPrimary/10 text-accentPrimary rounded-full text-sm font-semibold tracking-wide mb-6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                </svg>
+                Powered by Machine Learning
+            </div>
+            <h1
+                class="text-[2.5rem] md:text-5xl lg:text-[3.2rem] font-extrabold leading-[1.1] tracking-tight text-textPrimary mb-5">
+                Predict Employee
+                <span class="gradient-text">Attrition</span>
+                Before It Happens
+            </h1>
+            <p class="text-lg text-textSecondary leading-[1.7] mb-8 max-w-[520px]">
+                Leverage advanced SVM machine learning models to identify at-risk employees and take proactive measures
+                to improve retention. Make data-driven HR decisions with confidence.
+            </p>
+            <div class="flex flex-wrap gap-3.5">
+                <a href="/prediction" class="btn btn-primary px-8 py-3.5 text-base" id="hero-cta-predict">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    Start Prediction
+                </a>
+                <a href="/dashboard" class="btn btn-secondary px-8 py-3.5 text-base" id="hero-cta-dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    View Dashboard
+                </a>
+            </div>
+        </div>
+        <div class="hidden lg:flex justify-center items-center">
+            <div
+                class="bg-bgSecondary rounded-[24px] p-10 shadow-xl border border-borderLight text-center transition-transform duration-1000 transform hover:-translate-y-3">
+                <div class="relative w-[140px] h-[140px] mx-auto mb-4">
+                    <svg viewBox="0 0 120 120" class="w-full h-full">
+                        <circle cx="60" cy="60" r="52" fill="none" stroke="#e8ecf1" stroke-width="8" />
+                        <circle cx="60" cy="60" r="52" fill="none" stroke="url(#gradient1)" stroke-width="8"
+                            stroke-dasharray="326.73" stroke-dashoffset="{{ 326.73 - (326.73 * attrition_rate / 100) }}"
+                            stroke-linecap="round" transform="rotate(-90 60 60)" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#6366f1" />
+                                <stop offset="100%" style="stop-color:#a855f7" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div
+                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[2rem] font-extrabold text-accentPrimary tracking-tight">
+                        {{ attrition_rate }}%</div>
+                </div>
+                <div class="text-[0.95rem] font-semibold text-textSecondary">Attrition Rate</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="px-6 -mt-10 relative z-20" id="stats-section">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-bgSecondary rounded-2xl p-6 flex items-center gap-4 shadow-md border border-borderLight transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            id="stat-employees">
+            <div class="w-[52px] h-[52px] rounded-xl flex items-center justify-center shrink-0"
+                style="background: linear-gradient(135deg, #6366f1, #818cf8);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[1.5rem] font-extrabold text-textPrimary tracking-tight leading-[1.2]"
+                    data-target="{{ total_employees }}">{{ total_employees }}</span>
+                <span class="text-[0.82rem] text-textMuted font-medium">Total Employees</span>
+            </div>
+        </div>
+        <div class="bg-bgSecondary rounded-2xl p-6 flex items-center gap-4 shadow-md border border-borderLight transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            id="stat-attrition">
+            <div class="w-[52px] h-[52px] rounded-xl flex items-center justify-center shrink-0"
+                style="background: linear-gradient(135deg, #ef4444, #f97316);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="8.5" cy="7" r="4" />
+                    <line x1="18" y1="8" x2="23" y2="13" />
+                    <line x1="23" y1="8" x2="18" y2="13" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[1.5rem] font-extrabold text-textPrimary tracking-tight leading-[1.2]"
+                    data-target="{{ attrition_count }}">{{ attrition_count }}</span>
+                <span class="text-[0.82rem] text-textMuted font-medium">Employees Left</span>
+            </div>
+        </div>
+        <div class="bg-bgSecondary rounded-2xl p-6 flex items-center gap-4 shadow-md border border-borderLight transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            id="stat-age">
+            <div class="w-[52px] h-[52px] rounded-xl flex items-center justify-center shrink-0"
+                style="background: linear-gradient(135deg, #0ea5e9, #06b6d4);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[1.5rem] font-extrabold text-textPrimary tracking-tight leading-[1.2]">{{ avg_age
+                    }}</span>
+                <span class="text-[0.82rem] text-textMuted font-medium">Average Age</span>
+            </div>
+        </div>
+        <div class="bg-bgSecondary rounded-2xl p-6 flex items-center gap-4 shadow-md border border-borderLight transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            id="stat-income">
+            <div class="w-[52px] h-[52px] rounded-xl flex items-center justify-center shrink-0"
+                style="background: linear-gradient(135deg, #10b981, #34d399);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6">
+                    <line x1="12" y1="1" x2="12" y2="23" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-[1.5rem] font-extrabold text-textPrimary tracking-tight leading-[1.2]">${{ avg_income
+                    }}</span>
+                <span class="text-[0.82rem] text-textMuted font-medium">Avg Monthly Income</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Dataset Info -->
+<section class="py-10 pb-20 px-6" id="dataset-section">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-[2rem] font-extrabold tracking-tight text-textPrimary mb-3">Dataset Overview</h2>
+            <p class="text-[1.05rem] text-textSecondary max-w-[600px] mx-auto">Our model was trained on the Dicoding
+                Employee Dataset containing comprehensive employee information.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight transition-all hover:border-accentPrimary/20 hover:shadow-md"
+                id="category-demo">
+                <h4 class="flex items-center gap-2 text-base font-bold text-textPrimary mb-3.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"
+                        class="text-accentPrimary">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Demographics
+                </h4>
+                <ul class="list-none">
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Age,
+                        Gender</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Marital Status</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Education Level & Field</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Distance From Home</li>
+                </ul>
+            </div>
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight transition-all hover:border-accentPrimary/20 hover:shadow-md"
+                id="category-work">
+                <h4 class="flex items-center gap-2 text-base font-bold text-textPrimary mb-3.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"
+                        class="text-accentPrimary">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                    Work Details
+                </h4>
+                <ul class="list-none">
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Department & Job Role</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Job
+                        Level & Involvement</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Business Travel</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Overtime Status</li>
+                </ul>
+            </div>
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight transition-all hover:border-accentPrimary/20 hover:shadow-md"
+                id="category-comp">
+                <h4 class="flex items-center gap-2 text-base font-bold text-textPrimary mb-3.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"
+                        class="text-accentPrimary">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    Compensation
+                </h4>
+                <ul class="list-none">
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Monthly Income</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Daily
+                        & Hourly Rate</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">
+                        Salary Hike %</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Stock
+                        Option Level</li>
+                </ul>
+            </div>
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight transition-all hover:border-accentPrimary/20 hover:shadow-md"
+                id="category-exp">
+                <h4 class="flex items-center gap-2 text-base font-bold text-textPrimary mb-3.5">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"
+                        class="text-accentPrimary">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Experience
+                </h4>
+                <ul class="list-none">
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Total
+                        Working Years</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Years
+                        at Company</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Years
+                        in Current Role</li>
+                    <li class="py-1.5 text-[0.88rem] text-textSecondary border-b border-borderLight last:border-0">Years
+                        Since Promotion</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
