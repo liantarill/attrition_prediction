@@ -1,7 +1,23 @@
 {% extends "base.html" %}
-{% block title %}AttritionIQ — Employee Attrition Prediction{% endblock %}
+{% block title %}Dashboard — AttritionIQ{% endblock %}
 
 {% block content %}
-
-
+<section class="py-16 px-6" id="dashboard-section">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-[2rem] font-extrabold tracking-tight text-textPrimary mb-3">Analytics Dashboard</h1>
+            <p class="text-[1.05rem] text-textSecondary max-w-[600px] mx-auto">Interactive employee attrition analytics
+                powered by Looker Studio. Explore trends, patterns, and insights
+                from the employee dataset.</p>
+        </div>
+        <div class="bg-bgSecondary rounded-2xl overflow-hidden shadow-lg border border-borderLight aspect-[9/16] md:aspect-[16/10]"
+            id="dashboard-embed">
+            <iframe src="https://lookerstudio.google.com/embed/reporting/6aa2f3d8-db46-4f37-8fc7-c3c73f3cf7b8"
+                class="w-full h-full border-0" allowfullscreen
+                sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                loading="lazy" title="Employee Attrition Dashboard">
+            </iframe>
+        </div>
+    </div>
+</section>
 {% endblock %}
