@@ -153,8 +153,8 @@ def prediction():
             result = {
                 'prediction': int(pred),
                 'probability': prob_attrition,
-                'label': 'Yes — Employee is likely to leave' if pred == 1 else 'No — Employee is likely to stay',
-                'risk_level': 'High Risk' if prob_attrition >= 70 else ('Medium Risk' if prob_attrition >= 40 else 'Low Risk'),
+                'label': 'Iya - Risiko keluar tinggi' if pred == 1 else 'Tidak — Risiko keluar rendah',
+                'risk_level': 'Risiko Tinggi' if prob_attrition >= 70 else ('Risiko Sedang' if prob_attrition >= 40 else 'Risiko Rendah'),
                 'risk_color': '#e74c3c' if prob_attrition >= 70 else ('#f39c12' if prob_attrition >= 40 else '#27ae60'),
             }
         except Exception as e:
