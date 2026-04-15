@@ -2,5 +2,439 @@
 {% block title %}Prediction — LiSign{% endblock %}
 
 {% block content %}
+<section class="py-16 px-6" id="prediction-section">
+    <div class="max-w-[900px] mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-[2rem] font-extrabold tracking-tight text-textPrimary mb-3">Attrition Prediction</h1>
+            <p class="text-[1.05rem] text-textSecondary max-w-[600px] mx-auto">Masukkan informasi karyawan di bawah ini
+                untuk memprediksi kemungkinan attrition. Semua data perlu diisi agar hasil prediksi lebih akurat.</p>
+        </div>
 
+        {% if result and result.error is defined %}
+        <div class="flex items-center gap-3 p-4 rounded-xl mb-6 text-[0.92rem] font-medium bg-red-50 text-red-700 border border-red-200"
+            id="prediction-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            <span>Error: {{ result.error }}</span>
+        </div>
+        {% endif %}
+
+        {% if result and result.prediction is defined %}
+        <div class="bg-bgSecondary rounded-2xl p-8 mb-8 shadow-md border border-borderLight {% if result.prediction == 1 %}border-l-[4px] border-l-danger{% else %}border-l-[4px] border-l-success{% endif %}"
+            id="prediction-result" style="animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+            <style>
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-16px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            </style>
+            <div class="flex items-center gap-5 mb-7">
+                <div
+                    class="w-14 h-14 rounded-full flex items-center justify-center shrink-0 {% if result.prediction == 1 %}bg-red-50 text-danger{% else %}bg-emerald-50 text-success{% endif %}">
+                    {% if result.prediction == 1 %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-7 h-7">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-7 h-7">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    {% endif %}
+                </div>
+                <div class="flex flex-col">
+                    <h2 class="text-[1.3rem] font-bold mb-2 text-textPrimary">{{ result.label }}</h2>
+                    <div class="self-start">
+                        <span class="inline-flex px-[14px] py-1 rounded-full text-[0.8rem] font-semibold"
+                            style="background: {{ result.risk_color }}20; color: {{ result.risk_color }}; border: 1px solid {{ result.risk_color }}40;">
+                            {{ result.risk_level }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="flex justify-between items-center mb-2.5">
+                    <span class="text-[0.92rem] font-semibold text-textPrimary">Kemungkinan Resign</span>
+                    <span class="text-[1.5rem] font-extrabold tracking-tight" style="color: {{ result.risk_color }};">{{
+                        result.probability }}%</span>
+                </div>
+                <div class="h-3 bg-bgTertiary rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-1000 ease-out"
+                        style="width: {{ result.probability }}%; background: {{ result.risk_color }};"></div>
+                </div>
+                <div class="flex justify-between mt-1.5 text-[0.75rem] text-textMuted">
+                    <span>0% (Low Risk)</span>
+                    <span>50%</span>
+                    <span>100% (High Risk)</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/prediction" class="flex flex-col gap-7" id="prediction-form">
+            <!-- Demographics -->
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight shadow-sm" id="form-demographics">
+                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-borderLight">
+                    <svg class="text-accentPrimary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" width="22" height="22">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <h3 class="text-[1.1rem] font-bold text-textPrimary">Demographics</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="Age" class="text-[0.85rem] font-semibold text-textSecondary">Age</label>
+                        <input type="number" name="Age" id="Age" min="18" max="60"
+                            value="{{ request.form.get('Age', 30) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="Gender" class="text-[0.85rem] font-semibold text-textSecondary">Gender</label>
+                        <select name="Gender" id="Gender" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['Gender'] %}
+                            <option value="{{ opt }}" {% if request.form.get('Gender')==opt %}selected{% endif %}>{{ opt
+                                }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="MaritalStatus" class="text-[0.85rem] font-semibold text-textSecondary">Marital
+                            Status</label>
+                        <select name="MaritalStatus" id="MaritalStatus" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['MaritalStatus'] %}
+                            <option value="{{ opt }}" {% if request.form.get('MaritalStatus')==opt %}selected{% endif
+                                %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="Education" class="text-[0.85rem] font-semibold text-textSecondary">Education
+                            Level</label>
+                        <select name="Education" id="Education" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['Education'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('Education', '3' )|string==val|string
+                                %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="EducationField" class="text-[0.85rem] font-semibold text-textSecondary">Education
+                            Field</label>
+                        <select name="EducationField" id="EducationField" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['EducationField'] %}
+                            <option value="{{ opt }}" {% if request.form.get('EducationField')==opt %}selected{% endif
+                                %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="DistanceFromHome" class="text-[0.85rem] font-semibold text-textSecondary">Distance
+                            From Home (km)</label>
+                        <input type="number" name="DistanceFromHome" id="DistanceFromHome" min="1" max="29"
+                            value="{{ request.form.get('DistanceFromHome', 9) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Information -->
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight shadow-sm" id="form-job">
+                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-borderLight">
+                    <svg class="text-accentPrimary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" width="22" height="22">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                    <h3 class="text-[1.1rem] font-bold text-textPrimary">Job Information</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="Department"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Department</label>
+                        <select name="Department" id="Department" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['Department'] %}
+                            <option value="{{ opt }}" {% if request.form.get('Department')==opt %}selected{% endif %}>{{
+                                opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="JobRole" class="text-[0.85rem] font-semibold text-textSecondary">Job Role</label>
+                        <select name="JobRole" id="JobRole" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['JobRole'] %}
+                            <option value="{{ opt }}" {% if request.form.get('JobRole')==opt %}selected{% endif %}>{{
+                                opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="JobLevel" class="text-[0.85rem] font-semibold text-textSecondary">Job Level</label>
+                        <input type="number" name="JobLevel" id="JobLevel" min="1" max="5"
+                            value="{{ request.form.get('JobLevel', 2) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="BusinessTravel" class="text-[0.85rem] font-semibold text-textSecondary">Business
+                            Travel</label>
+                        <select name="BusinessTravel" id="BusinessTravel" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['BusinessTravel'] %}
+                            <option value="{{ opt }}" {% if request.form.get('BusinessTravel')==opt %}selected{% endif
+                                %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="OverTime" class="text-[0.85rem] font-semibold text-textSecondary">Overtime</label>
+                        <select name="OverTime" id="OverTime" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for opt in categorical_features['OverTime'] %}
+                            <option value="{{ opt }}" {% if request.form.get('OverTime')==opt %}selected{% endif %}>{{
+                                opt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="NumCompaniesWorked"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Companies Worked</label>
+                        <input type="number" name="NumCompaniesWorked" id="NumCompaniesWorked" min="0" max="9"
+                            value="{{ request.form.get('NumCompaniesWorked', 2) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Satisfaction & Involvement -->
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight shadow-sm" id="form-satisfaction">
+                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-borderLight">
+                    <svg class="text-accentPrimary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" width="22" height="22">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                        <line x1="9" y1="9" x2="9.01" y2="9" />
+                        <line x1="15" y1="9" x2="15.01" y2="9" />
+                    </svg>
+                    <h3 class="text-[1.1rem] font-bold text-textPrimary">Satisfaction & Involvement</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="EnvironmentSatisfaction"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Environment Satisfaction</label>
+                        <select name="EnvironmentSatisfaction" id="EnvironmentSatisfaction" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['EnvironmentSatisfaction'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('EnvironmentSatisfaction', '3'
+                                )|string==val|string %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="JobSatisfaction" class="text-[0.85rem] font-semibold text-textSecondary">Job
+                            Satisfaction</label>
+                        <select name="JobSatisfaction" id="JobSatisfaction" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['JobSatisfaction'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('JobSatisfaction', '3' )|string==val|string
+                                %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="JobInvolvement" class="text-[0.85rem] font-semibold text-textSecondary">Job
+                            Involvement</label>
+                        <select name="JobInvolvement" id="JobInvolvement" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['JobInvolvement'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('JobInvolvement', '3' )|string==val|string
+                                %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="RelationshipSatisfaction"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Relationship Satisfaction</label>
+                        <select name="RelationshipSatisfaction" id="RelationshipSatisfaction" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['RelationshipSatisfaction'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('RelationshipSatisfaction', '3'
+                                )|string==val|string %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="WorkLifeBalance" class="text-[0.85rem] font-semibold text-textSecondary">Work-Life
+                            Balance</label>
+                        <select name="WorkLifeBalance" id="WorkLifeBalance" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['WorkLifeBalance'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('WorkLifeBalance', '3' )|string==val|string
+                                %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="PerformanceRating"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Performance Rating</label>
+                        <select name="PerformanceRating" id="PerformanceRating" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                            {% for val, label in scale_labels['PerformanceRating'].items() %}
+                            <option value="{{ val }}" {% if request.form.get('PerformanceRating', '3'
+                                )|string==val|string %}selected{% endif %}>{{ val }} - {{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compensation -->
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight shadow-sm" id="form-compensation">
+                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-borderLight">
+                    <svg class="text-accentPrimary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" width="22" height="22">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    <h3 class="text-[1.1rem] font-bold text-textPrimary">Compensation</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="MonthlyIncome" class="text-[0.85rem] font-semibold text-textSecondary">Monthly
+                            Income ($)</label>
+                        <input type="number" name="MonthlyIncome" id="MonthlyIncome" min="1000" max="20000"
+                            value="{{ request.form.get('MonthlyIncome', 5000) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="DailyRate" class="text-[0.85rem] font-semibold text-textSecondary">Daily Rate
+                            ($)</label>
+                        <input type="number" name="DailyRate" id="DailyRate" min="100" max="1500"
+                            value="{{ request.form.get('DailyRate', 800) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="HourlyRate" class="text-[0.85rem] font-semibold text-textSecondary">Hourly Rate
+                            ($)</label>
+                        <input type="number" name="HourlyRate" id="HourlyRate" min="30" max="100"
+                            value="{{ request.form.get('HourlyRate', 66) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="MonthlyRate" class="text-[0.85rem] font-semibold text-textSecondary">Monthly Rate
+                            ($)</label>
+                        <input type="number" name="MonthlyRate" id="MonthlyRate" min="2000" max="27000"
+                            value="{{ request.form.get('MonthlyRate', 14000) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="PercentSalaryHike" class="text-[0.85rem] font-semibold text-textSecondary">Salary
+                            Hike (%)</label>
+                        <input type="number" name="PercentSalaryHike" id="PercentSalaryHike" min="11" max="25"
+                            value="{{ request.form.get('PercentSalaryHike', 14) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="StockOptionLevel" class="text-[0.85rem] font-semibold text-textSecondary">Stock
+                            Option Level</label>
+                        <input type="number" name="StockOptionLevel" id="StockOptionLevel" min="0" max="3"
+                            value="{{ request.form.get('StockOptionLevel', 1) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experience & Tenure -->
+            <div class="bg-bgSecondary rounded-2xl p-7 border border-borderLight shadow-sm" id="form-experience">
+                <div class="flex items-center gap-2.5 mb-6 pb-4 border-b border-borderLight">
+                    <svg class="text-accentPrimary" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" width="22" height="22">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <h3 class="text-[1.1rem] font-bold text-textPrimary">Experience & Tenure</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label for="TotalWorkingYears" class="text-[0.85rem] font-semibold text-textSecondary">Total
+                            Working Years</label>
+                        <input type="number" name="TotalWorkingYears" id="TotalWorkingYears" min="0" max="40"
+                            value="{{ request.form.get('TotalWorkingYears', 10) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="YearsAtCompany" class="text-[0.85rem] font-semibold text-textSecondary">Years at
+                            Company</label>
+                        <input type="number" name="YearsAtCompany" id="YearsAtCompany" min="0" max="40"
+                            value="{{ request.form.get('YearsAtCompany', 5) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="YearsInCurrentRole" class="text-[0.85rem] font-semibold text-textSecondary">Years in
+                            Current Role</label>
+                        <input type="number" name="YearsInCurrentRole" id="YearsInCurrentRole" min="0" max="18"
+                            value="{{ request.form.get('YearsInCurrentRole', 3) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="YearsSinceLastPromotion"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Years Since Last Promotion</label>
+                        <input type="number" name="YearsSinceLastPromotion" id="YearsSinceLastPromotion" min="0"
+                            max="15" value="{{ request.form.get('YearsSinceLastPromotion', 1) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="YearsWithCurrManager" class="text-[0.85rem] font-semibold text-textSecondary">Years
+                            With Current Manager</label>
+                        <input type="number" name="YearsWithCurrManager" id="YearsWithCurrManager" min="0" max="17"
+                            value="{{ request.form.get('YearsWithCurrManager', 3) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label for="TrainingTimesLastYear"
+                            class="text-[0.85rem] font-semibold text-textSecondary">Training Times Last Year</label>
+                        <input type="number" name="TrainingTimesLastYear" id="TrainingTimesLastYear" min="0" max="6"
+                            value="{{ request.form.get('TrainingTimesLastYear', 3) }}" required
+                            class="px-[14px] py-[10px] border border-gray-200 rounded-lg font-sans text-[0.92rem] text-textPrimary bg-bgPrimary transition-all outline-none focus:border-accentPrimary focus:ring-[3px] focus:ring-accentPrimary/10 focus:bg-white hover:border-gray-300">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3.5 justify-center pt-2">
+                <button type="submit" class="btn btn-primary px-8 py-3.5 text-base" id="btn-predict">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    Predict Attrition
+                </button>
+                <button type="reset" class="btn btn-secondary" id="btn-reset">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <polyline points="1 4 1 10 7 10" />
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                    </svg>
+                    Reset Form
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
 {% endblock %}
